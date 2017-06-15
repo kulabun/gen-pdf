@@ -16,7 +16,7 @@
   $ npm test
   $ npm start
 
-  $ curl -o tktpost.pdf -X POST -H "Content-Type: application/x-www-form-urlencoded" -d 'html=<div>hi</div>' "http://localhost:3000/"
+  $ HTML=$(base64 -w 0 charts.html) && curl -o chart.pdf -X POST -H "Content-Type: application/json" -d "{\"html\":\"$HTML\"}" "http://localhost:3000/"
   # you could provide custom configuration to generate the pdf look Next javascript Example
   # all configuration from https://github.com/marcbachmann/node-html-pdf#options is possible configuration
   # prometheus metrics

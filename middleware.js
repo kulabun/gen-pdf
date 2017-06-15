@@ -9,7 +9,11 @@ const htmlPdfDefaultoptions = {
 };
 
 function insureRequest(req, res, next) {
-    if(!req.body.html) {
+    // URL rendering is broken..
+    // if ((!req.body.html && !req.body.url) || (req.body.html && req.body.url)) {
+    //     return res.sendStatus(400)
+    // }
+    if (!req.body.html || req.body.url) {
         return res.sendStatus(400)
     }
     if (req.body) {

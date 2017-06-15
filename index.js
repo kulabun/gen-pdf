@@ -15,12 +15,20 @@ var express = require('express'),
     });
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname+'/help.html');
+    res.sendFile(__dirname + '/help.html');
 });
 
 app.post('/', jsonParser, insureRequest, function (req, res, next) {
     var settings = req.body;
-    settings.html = new Buffer(req.body.html, 'base64').toString();
+    if (settings.html) {
+        settings.html = new Buffer(req.body.html, 'base64').toString();
+    }
+    if (settings.header) {
+        settings.header = new Buffer(req.body.header, 'base64').toString();
+    }
+    if (settings.footer) {
+        settings.footer = new Buffer(req.body.footer, 'base64').toString();
+    }
 
     conversion(settings, function (err, result) {
         if (err || !result) {

@@ -7,11 +7,11 @@
     "start": "node index.js",
     "test": "mocha"
   },
-  "author": "waleedsamy634@gmail.com",
+  "author": "konstantin.labun@gmail.com",
   "license": "MIT",
   "repository" :{
     "type" : "git",
-    "url" : "https://github.com/waleedsamy/gen-pdf.git"
+    "url" : "https://github.com/kulabun/gen-pdf.git"
   },
   "dependencies": {
     "body-parser": "^1.16.1",
