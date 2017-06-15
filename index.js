@@ -1,31 +1,42 @@
 var express = require('express'),
     prom = require('prom-client'),
-    pdf = require('html-pdf'),
+    conversion = require("phantom-html-to-pdf")(),
     bodyParser = require('body-parser'),
     exwml = require('exwml'),
     app = express(),
-    insureHTML = require('./middleware').insureHTML,
-    insureConfig = require('./middleware').insureConfig,
+    insureRequest = require('./middleware').insureRequest,
     promRegisterMetrics = require('./middleware').promRegisterMetrics,
     logErrors = require('./middleware').logErrors,
     promUpdateErrorMetrics = require('./middleware').promUpdateErrorMetrics,
     errorHandler = require('./middleware').errorHandler,
     metrics = require('./metrics'),
-    urlencodedParser = bodyParser.urlencoded({
-        limit: '50mb',
-        extended: false
+    jsonParser = bodyParser.json({
+        limit: '5mb'
     });
 
-app.post('/', urlencodedParser, insureHTML, insureConfig, function(req, res, next) {
-    pdf.create(req.body.html, req.body.config).toStream(function(err, stream) {
-        if (err || !stream) {
-            return next(err);
+app.get('/', function (req, res) {
+    res.sendFile(__dirname+'/help.html');
+});
+
+app.post('/', jsonParser, insureRequest, function (req, res, next) {
+    var settings = req.body;
+    settings.html = new Buffer(req.body.html, 'base64').toString();
+
+    conversion(settings, function (err, result) {
+        if (err || !result) {
+            console.log(err);
+            metrics.httpRequestsTotal.inc({
+                code: 500,
+                method: 'post'
+            });
+            return res.sendStatus(500);
         }
+
         metrics.httpRequestsTotal.inc({
             code: 200,
             method: 'post'
         });
-        stream.pipe(res);
+        result.stream.pipe(res);
     });
 });
 
@@ -35,7 +46,7 @@ app.use(logErrors);
 app.use(promUpdateErrorMetrics);
 app.use(errorHandler);
 
-app.listen(3000, function() {
+app.listen(3000, function () {
     logger.alert('Service starting', {
         host: 'localhost',
         port: 3000

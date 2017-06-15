@@ -3,30 +3,19 @@ const _ = require('lodash'),
     prom = require('prom-client');
 
 const htmlPdfDefaultoptions = {
-    'format': 'A4',
-    'orientation': 'portrait',
-    'border': {
-        'top': '4mm',
-        'right': '4mm',
-        'bottom': '4mm',
-        'left': '4mm'
+    'format': {
+        'quality': 100
     }
 };
 
-function insureHTML(req, res, next) {
-    if (!req.body.html) {
-        let err = new Error('body param `html` is missing.');
-        err.code = 400;
-        return next(err);
+function insureRequest(req, res, next) {
+    if(!req.body.html) {
+        return res.sendStatus(400)
     }
-    return next();
-}
-
-function insureConfig(req, res, next) {
-    if (req.body.config) {
+    if (req.body) {
         try {
-            let conf = JSON.parse(req.body.config);
-            let mergedConfig = {};
+            var conf = req.body;//JSON.parse(req.body.config);
+            var mergedConfig = {};
             _.merge(mergedConfig, htmlPdfDefaultoptions, conf);
             req.body.config = mergedConfig;
         } catch (e) {
@@ -61,8 +50,7 @@ function errorHandler(err, req, res, next) {
 }
 
 module.exports = {
-    insureHTML: insureHTML,
-    insureConfig: insureConfig,
+    insureRequest: insureRequest,
     promRegisterMetrics: promRegisterMetrics,
     logErrors: logErrors,
     promUpdateErrorMetrics: promUpdateErrorMetrics,
